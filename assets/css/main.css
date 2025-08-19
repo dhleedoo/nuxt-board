@@ -1,0 +1,372 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 최신 디자인 트렌드를 위한 커스텀 스타일 */
+@layer components {
+  /* Glassmorphism 효과 - 다크모드 최적화 */
+  .glass {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .glass-dark {
+    @apply bg-slate-800/30 backdrop-blur-xl border border-slate-600/30 shadow-2xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+  
+  .glass-strong {
+    @apply bg-white/15 backdrop-blur-2xl border border-white/30 shadow-2xl;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-subtle {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  }
+  
+  .glass-card {
+    @apply bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border border-white/20 shadow-2xl;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  /* 네온 그라데이션 */
+  .gradient-neon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .gradient-sunset {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+  
+  .gradient-ocean {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+  
+  /* 마이크로 인터랙션 */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-2xl;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300 ease-out hover:shadow-lg hover:shadow-blue-500/25;
+  }
+  
+  /* 모던 카드 */
+  .card-modern {
+    @apply bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300;
+  }
+  
+  /* 버튼 스타일 */
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold 
+           transition-all duration-300 hover:from-blue-600 hover:to-purple-700 hover:shadow-lg 
+           hover:shadow-blue-500/25 active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply bg-slate-700 text-slate-200 px-6 py-3 rounded-xl font-semibold border border-slate-600
+           transition-all duration-300 hover:bg-slate-600 hover:shadow-md active:scale-95;
+  }
+}
+
+/* 다크모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .card-modern {
+    @apply bg-slate-800 border-slate-700;
+  }
+}
+
+/* 커스텀 스크롤바 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* 향상된 로딩 애니메이션 */
+@layer components {
+  /* 스켈레톤 로딩 */
+  .skeleton {
+    @apply animate-pulse bg-gradient-to-r from-slate-200 to-slate-300 rounded;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  
+  .skeleton-dark {
+    @apply animate-pulse bg-gradient-to-r from-slate-700 to-slate-600 rounded;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  
+  /* 스핀 로더 */
+  .spinner-primary {
+    @apply w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin;
+  }
+  
+  .spinner-large {
+    @apply w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin;
+  }
+  
+  /* 도트 로더 */
+  .dots-loader {
+    display: inline-block;
+    position: relative;
+    width: 64px;
+    height: 64px;
+  }
+  
+  .dots-loader div {
+    position: absolute;
+    top: 27px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #3b82f6;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+  
+  .dots-loader div:nth-child(1) {
+    left: 6px;
+    animation: dots1 0.6s infinite;
+  }
+  
+  .dots-loader div:nth-child(2) {
+    left: 6px;
+    animation: dots2 0.6s infinite;
+  }
+  
+  .dots-loader div:nth-child(3) {
+    left: 26px;
+    animation: dots2 0.6s infinite;
+  }
+  
+  .dots-loader div:nth-child(4) {
+    left: 45px;
+    animation: dots3 0.6s infinite;
+  }
+  
+  /* 펄스 로더 */
+  .pulse-loader {
+    @apply w-12 h-12 bg-blue-500 rounded-full;
+    animation: pulse-scale 1s ease-in-out infinite;
+  }
+  
+  /* 바운스 로더 */
+  .bounce-loader {
+    display: inline-block;
+    position: relative;
+    width: 64px;
+    height: 64px;
+  }
+  
+  .bounce-loader div {
+    display: inline-block;
+    position: absolute;
+    left: 6px;
+    width: 13px;
+    background: #3b82f6;
+    animation: bounce-loader 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+  }
+  
+  .bounce-loader div:nth-child(1) {
+    left: 6px;
+    animation-delay: -0.24s;
+  }
+  
+  .bounce-loader div:nth-child(2) {
+    left: 26px;
+    animation-delay: -0.12s;
+  }
+  
+  .bounce-loader div:nth-child(3) {
+    left: 45px;
+    animation-delay: 0;
+  }
+  
+  /* 페이드 인 애니메이션 */
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+  }
+  
+  .slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+  }
+  
+  /* 스태거 애니메이션 */
+  .stagger-item {
+    opacity: 0;
+    animation: staggerFadeIn 0.6s ease-out forwards;
+  }
+  
+  .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-item:nth-child(6) { animation-delay: 0.6s; }
+  .stagger-item:nth-child(7) { animation-delay: 0.7s; }
+  .stagger-item:nth-child(8) { animation-delay: 0.8s; }
+  .stagger-item:nth-child(9) { animation-delay: 0.9s; }
+  .stagger-item:nth-child(10) { animation-delay: 1.0s; }
+}
+
+/* 키프레임 애니메이션 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes dots1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes dots3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+@keyframes dots2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(19px, 0);
+  }
+}
+
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce-loader {
+  0%, 80%, 100% {
+    height: 32px;
+    transform: translateY(0);
+  }
+  40% {
+    height: 48px;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 호버 효과 개선 */
+@layer components {
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+  
+  .hover-rotate {
+    @apply transition-transform duration-300 hover:rotate-3;
+  }
+  
+  .hover-blur {
+    @apply transition-all duration-300 hover:backdrop-blur-lg;
+  }
+}
+
+/* 반응형 애니메이션 최적화 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
