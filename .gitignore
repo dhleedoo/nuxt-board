@@ -23,3 +23,6 @@ logs
 .env.*
 !.env.example
 !.env.copy
+
+# Claude Code 설정 폴더 (AI 어시스턴트 전용)
+.claude/
