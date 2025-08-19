@@ -7,7 +7,7 @@
 ### 🚀 프로젝트 초기화
 
 ```powershell
-# 현재 디렉토리에 Nuxt 3 프로젝트 생성
+# 현재 디렉토리에 Nuxt 4 프로젝트 생성
 npx nuxi@latest init .
 
 # 의존성 패키지 설치
@@ -232,6 +232,54 @@ nuxt-board/
 
 ---
 
+## 🎨 Phase 2.5: 스타일링 & 상태관리 설정
+
+### ✅ Tailwind CSS 통합
+```powershell
+# Tailwind CSS 모듈 설치
+npm install @nuxtjs/tailwindcss
+
+# nuxt.config.ts 자동 업데이트 확인
+# modules: ['@nuxtjs/tailwindcss'] 추가됨
+
+# assets/css/main.css 생성
+# @tailwind base; @tailwind components; @tailwind utilities; 포함
+```
+
+**결과 확인:**
+- ✅ `nuxt.config.ts`에 `@nuxtjs/tailwindcss` 모듈 추가
+- ✅ `assets/css/main.css` 파일 생성
+- ✅ 모든 컴포넌트에서 Tailwind 클래스 사용 가능
+
+### ✅ Pinia 상태관리 설정
+```powershell
+# Pinia 상태관리 라이브러리 설치
+npm install @pinia/nuxt pinia
+
+# nuxt.config.ts 자동 업데이트 확인  
+# modules: ['@pinia/nuxt'] 추가됨
+
+# stores 폴더 자동 생성 및 인식
+```
+
+**Pinia 스토어 생성 예시:**
+```typescript
+// stores/board.ts - 게시판 상태 관리
+export const useBoardStore = defineStore('board', () => {
+  const boards = ref([])
+  const loading = ref(false)
+  
+  return { boards, loading }
+})
+```
+
+**결과 확인:**
+- ✅ `stores/` 폴더 자동 인식
+- ✅ 모든 컴포넌트에서 `useBoardStore()` 사용 가능
+- ✅ 반응형 상태 관리 시스템 구축
+
+---
+
 ## 🚀 Phase 3: 서버 API 구축 완료!
 
 ### ✅ 추가된 서버 구조
@@ -277,14 +325,74 @@ server/api/board/[id].get.ts
 - ✅ **조회수 증가** 기능 실시간 반영
 - ✅ **새로고침 버튼** API 재호출 기능
 
-### 🚀 Phase 4에서 추가될 예정
+---
+
+## 🗄️ Phase 3.5: Oracle DB 연동 설정
+
+### ✅ Oracle Database 드라이버 설치
+```powershell
+# Oracle DB 연동 패키지 설치
+npm install oracledb
+
+# TypeScript 타입 정의 설치
+npm install @types/oracledb --save-dev
+
+# 환경변수 관리용 dotenv 설치
+npm install dotenv
 ```
-├── server/utils/        # Oracle DB 연결 유틸리티
-│   └── database.ts      # DB 커넥션 풀 관리
-└── server/api/board/    # 확장된 CRUD API
-    ├── index.post.ts    # POST - 게시글 작성
-    ├── [id].put.ts      # PUT - 게시글 수정
-    └── [id].delete.ts   # DELETE - 게시글 삭제
+
+**데이터베이스 연결 설정:**
+```typescript
+// server/utils/database.ts - Oracle DB 연결 유틸리티
+import oracledb from 'oracledb'
+
+export async function getConnection() {
+  return await oracledb.getConnection({
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    connectString: process.env.DB_CONNECT_STRING
+  })
+}
+```
+
+**환경변수 설정 (.env 파일):**
+```bash
+# Oracle DB 연결 정보
+DB_USER=your_username
+DB_PASSWORD=your_password  
+DB_CONNECT_STRING=localhost:1521/XE
+```
+
+**결과 확인:**
+- ✅ Oracle DB 드라이버 정상 설치
+- ✅ TypeScript 지원으로 자동완성 가능
+- ✅ 환경변수로 보안 정보 분리
+- ✅ `server/utils/database.ts` 연결 유틸리티 생성
+
+---
+
+## 🚀 Phase 4: CRUD API 완전 구현
+
+### ✅ 완성된 API 엔드포인트
+```
+server/api/board/
+├── index.get.ts     # GET /api/board - 목록 조회  
+├── index.post.ts    # POST /api/board - 게시글 작성
+├── [id].get.ts      # GET /api/board/:id - 상세 조회
+├── [id].put.ts      # PUT /api/board/:id - 게시글 수정
+└── [id].delete.ts   # DELETE /api/board/:id - 게시글 삭제
+```
+
+**CRUD API 구현 과정:**
+```powershell
+# 1. 기본 조회 API 구현 (이미 완료)
+# server/api/board/index.get.ts
+# server/api/board/[id].get.ts
+
+# 2. 생성/수정/삭제 API 추가 구현
+# server/api/board/index.post.ts
+# server/api/board/[id].put.ts  
+# server/api/board/[id].delete.ts
 ```
 
 ---
