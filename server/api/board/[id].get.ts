@@ -1,4 +1,4 @@
-// 게시글 상세 조회 API - GET /api/board/[id] (Oracle DB 연동)
+// 게시글 상세 조회 API - GET /api/board/[id] (Oracle DB 연동, 성능 최적화)
 import { executeQuery } from '~/server/utils/database'
 
 export default defineEventHandler(async (event) => {
@@ -13,12 +13,13 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // 게시글 조회 쿼리 (EXCEL_DATA 제외, 안전한 컬럼만)
+    // 게시글 조회 쿼리 - EXCEL_DATA 포함하여 한 번에 조회 (성능 최적화)
     const selectQuery = `
-      SELECT 
+      SELECT /*+ INDEX(BOARD PK_BOARD) */ 
         BOARD_ID,
         TITLE,
         CONTENT,
+        EXCEL_DATA,
         TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') as CREATED_AT,
         TO_CHAR(UPDATED_AT, 'YYYY-MM-DD HH24:MI:SS') as UPDATED_AT
       FROM BOARD 
@@ -36,17 +37,40 @@ export default defineEventHandler(async (event) => {
 
     const post = result.rows[0]
 
-    // 기존 테이블에는 VIEWS 컬럼이 없으므로 조회수 증가 기능 제거
-    // 필요시 VIEWS 컬럼을 추가하거나 별도 테이블로 관리 가능
+    // EXCEL_DATA 처리 - JSON 타입이므로 파싱이 필요 없음 (이미 객체 형태)
+    let excelData = null
+    if (post.EXCEL_DATA) {
+      // JSON 타입이므로 파싱이 필요 없음, 하지만 안전성을 위해 확인
+      if (typeof post.EXCEL_DATA === 'string') {
+        try {
+          excelData = JSON.parse(post.EXCEL_DATA)
+        } catch (parseError) {
+          console.warn('⚠️ EXCEL_DATA JSON 파싱 실패:', parseError)
+          excelData = post.EXCEL_DATA
+        }
+      } else {
+        // 이미 객체 형태
+        excelData = post.EXCEL_DATA
+      }
+    }
 
     return {
       success: true,
       message: "게시글 조회 성공 (Oracle DB)", 
-      data: post,
+      data: {
+        BOARD_ID: Number(post.BOARD_ID) || 0,
+        TITLE: String(post.TITLE || ''),
+        CONTENT: String(post.CONTENT || ''),
+        EXCEL_DATA: excelData,
+        CREATED_AT: String(post.CREATED_AT || ''),
+        UPDATED_AT: String(post.UPDATED_AT || '')
+      },
       meta: {
         endpoint: `/api/board/${id}`,
         method: "GET",
         source: "Oracle Database",
+        hasExcelData: excelData !== null,
+        performance: "optimized",
         timestamp: new Date().toLocaleString('ko-KR', {
           timeZone: 'Asia/Seoul'
         })

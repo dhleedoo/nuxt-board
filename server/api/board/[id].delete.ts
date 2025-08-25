@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
     const postId = Number(id)
 
-    // 게시글 존재 확인 및 정보 조회 (기존 테이블 구조 사용)
+    // 게시글 존재 확인 및 정보 조회
     const checkQuery = `
       SELECT 
         BOARD_ID,
@@ -36,9 +36,19 @@ export default defineEventHandler(async (event) => {
 
     const postInfo = checkResult.rows[0]
 
-    // 게시글 삭제 쿼리 (기존 테이블 구조 사용)
-    const deleteQuery = `DELETE FROM BOARD WHERE BOARD_ID = :id`
-    const result = await executeQuery(deleteQuery, { id: postId })
+    // 게시글 삭제
+    const deleteQuery = `
+      DELETE FROM BOARD 
+      WHERE BOARD_ID = :postId
+    `
+    
+    const result = await executeQuery(deleteQuery, { postId })
+    
+    if (result.rowsAffected && result.rowsAffected > 0) {
+      console.log(`✅ 게시글 삭제 성공: BOARD_ID ${postId}`)
+    } else {
+      console.log(`⚠️ 삭제할 게시글이 없습니다: BOARD_ID ${postId}`)
+    }
 
     return {
       success: true,

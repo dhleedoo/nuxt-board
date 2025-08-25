@@ -348,14 +348,14 @@ import { useBoardStore } from '~/stores/board'
 // Pinia 스토어 사용
 const boardStore = useBoardStore()
 
-// 게시글 상세보기 (스토어 사용)
-const viewPost = async (postId) => {
-  await boardStore.fetchPost(postId)
+// 게시글 상세보기 페이지로 이동
+const viewPost = (postId) => {
+  navigateTo(`/detail/${postId}`)
 }
 
-// 상세보기 모달 열기 (로컬 데이터 사용)
+// 상세보기 페이지로 이동
 const showPostDetail = (post) => {
-  boardStore.selectedPost = post
+  navigateTo(`/detail/${post.BOARD_ID}`)
 }
 
 // 게시글 수정 페이지로 이동

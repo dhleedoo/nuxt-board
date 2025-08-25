@@ -3,6 +3,9 @@ import { executeQuery } from '~/server/utils/database'
 
 export default defineEventHandler(async (event) => {
   try {
+    // BOARD 테이블과 EXCEL_DATA 컬럼 존재 확인
+    // await ensureBoardTable() // This line is removed as per the edit hint.
+    
     // URL에서 ID 파라미터 추출
     const id = getRouterParam(event, 'id')
     
@@ -29,7 +32,8 @@ export default defineEventHandler(async (event) => {
       id: Number(id),
       title: body.title.trim(),
       content: body.content.trim(),
-      author: body.author?.trim() || '익명'
+      author: body.author?.trim() || '익명',
+      excelData: body.excelData || null
     }
 
     // 유효성 검사
@@ -47,7 +51,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // 게시글 존재 확인 (기존 테이블 구조 사용)
+    // 게시글 존재 확인
     const checkQuery = `SELECT BOARD_ID FROM BOARD WHERE BOARD_ID = :id`
     const checkResult = await executeQuery(checkQuery, { id: updateData.id })
     
@@ -58,23 +62,31 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // 게시글 수정 쿼리 (기존 테이블 구조 사용)
+    // Excel 데이터를 JSON 타입으로 직접 저장 (문자열 변환 불필요)
+    let excelDataJson = null
+    if (updateData.excelData && Array.isArray(updateData.excelData) && updateData.excelData.length > 0) {
+      excelDataJson = JSON.stringify(updateData.excelData) // Oracle DB 바인드를 위해 문자열로 변환
+    }
+
+    // 게시글 수정 쿼리 (EXCEL_DATA 컬럼 포함)
     const updateQuery = `
       UPDATE BOARD 
       SET 
         TITLE = :title,
         CONTENT = :content,
-        UPDATED_AT = CURRENT_TIMESTAMP
+        EXCEL_DATA = :excelData,
+        UPDATED_AT = SYSDATE
       WHERE BOARD_ID = :id
     `
     
     const result = await executeQuery(updateQuery, {
       title: updateData.title,
       content: updateData.content,
+      excelData: excelDataJson,
       id: updateData.id
     })
 
-    // 수정된 게시글 조회 (기존 테이블 구조 사용)
+    // 수정된 게시글 조회
     const selectQuery = `
       SELECT 
         BOARD_ID,
@@ -88,16 +100,32 @@ export default defineEventHandler(async (event) => {
     `
     
     const updatedResult = await executeQuery(selectQuery, { id: updateData.id })
+    const updatedPost = updatedResult.rows?.[0]
+    
+    // EXCEL_DATA 파싱
+    let parsedExcelData = null
+    if (updatedPost.EXCEL_DATA) {
+      try {
+        parsedExcelData = JSON.parse(updatedPost.EXCEL_DATA)
+      } catch (parseError) {
+        console.warn('⚠️ EXCEL_DATA JSON 파싱 실패:', parseError)
+        parsedExcelData = updatedPost.EXCEL_DATA
+      }
+    }
 
     return {
       success: true,
       message: "게시글 수정 성공",
-      data: updatedResult.rows?.[0],
+      data: {
+        ...updatedPost,
+        EXCEL_DATA: parsedExcelData
+      },
       meta: {
         endpoint: `/api/board/${id}`,
         method: "PUT",
         source: "Oracle Database",
         rowsAffected: result.rowsAffected,
+        excelDataSaved: !!excelDataJson,
         timestamp: new Date().toLocaleString('ko-KR', {
           timeZone: 'Asia/Seoul'
         })

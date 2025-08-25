@@ -176,6 +176,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
 // 모바일 메뉴 상태
 const mobileMenuOpen = ref<boolean>(false)
 

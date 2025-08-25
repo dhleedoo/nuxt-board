@@ -10,6 +10,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@mescius/spread-sheets-resources-ko": "^18.2.0",
+    "@mescius/spread-sheets-vue": "^18.2.0",
     "@pinia/nuxt": "^0.11.2",
     "dotenv": "^17.2.1",
     "nuxt": "^4.0.3",

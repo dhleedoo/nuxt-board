@@ -342,46 +342,7 @@
       </div>
     </div>
 
-    <!-- 상세보기 모달 -->
-    <div v-if="selectedPost" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click="closeModal">
-      <div class="glass-strong rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden" @click.stop>
-        <!-- 모달 헤더 -->
-        <div class="flex items-center justify-between p-6 border-b border-white/20">
-          <div class="flex-1">
-            <h3 class="text-xl font-bold text-white pr-8">{{ selectedPost.TITLE }}</h3>
-            <div class="flex items-center gap-4 mt-2 text-sm text-slate-300">
-              <span class="inline-flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                </svg>
-                ID: {{ selectedPost.BOARD_ID }}
-              </span>
-              <span class="inline-flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                {{ formatDate(selectedPost.CREATED_AT) }}
-              </span>
-            </div>
-          </div>
-          <button 
-            @click="closeModal" 
-            class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all duration-200"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-        
-        <!-- 모달 바디 -->
-        <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          <div class="prose prose-slate max-w-none">
-            <div class="bg-white/10 rounded-xl p-6 whitespace-pre-wrap leading-relaxed text-white border border-white/20">{{ selectedPost.CONTENT }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    
   </div>
 </template>
 
@@ -392,7 +353,6 @@ import { ref, onMounted } from 'vue'
 const loading = ref(false)
 const error = ref(null)
 const boardData = ref([])
-const selectedPost = ref(null)
 const lastUpdate = ref('')
 
 // 페이지네이션 데이터
@@ -512,26 +472,14 @@ const performSearch = () => {
   loadBoardData(1)
 }
 
-// 게시글 상세보기
-const viewPost = async (postId) => {
-  try {
-    const response = await $fetch(`/api/board/${postId}`)
-    if (response.success) {
-      selectedPost.value = response.data
-    }
-  } catch (err) {
-    alert(`게시글 로드 실패: ${err.message}`)
-  }
+// 게시글 상세보기 페이지로 이동
+const viewPost = (postId) => {
+  navigateTo(`/detail/${postId}`)
 }
 
-// 모달 닫기
-const closeModal = () => {
-  selectedPost.value = null
-}
-
-// 상세보기 모달 열기
-const showPostDetail = async (post) => {
-  selectedPost.value = post
+// 상세보기 페이지로 이동 (상세 정보와 함께)
+const showPostDetail = (post) => {
+  navigateTo(`/detail/${post.BOARD_ID}`)
 }
 
 // 게시글 수정 페이지로 이동

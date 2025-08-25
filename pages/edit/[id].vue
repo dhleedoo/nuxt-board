@@ -43,106 +43,41 @@
 
     <!-- 수정 폼 섹션 -->
     <div v-else-if="form.title" class="max-w-4xl mx-auto">
-      <form @submit.prevent="updatePost" class="space-y-6">
-        <!-- 제목 입력 -->
+      <BoardForm 
+        mode="edit"
+        title-placeholder="수정할 제목을 입력하세요..."
+        content-placeholder="• 기존 내용을 확인하고 수정해주세요
+• 더 나은 정보로 업데이트해주세요
+• 수정 사항을 명확히 표시해주세요"
+        submit-button-text="수정 완료"
+        submitting-text="수정 중..."
+        cancel-button-text="취소"
+        :initial-data="form"
+        :excel-headers="['제품명', '수량', '단가', '총액']"
+        @submit="handleFormSubmit"
+        @cancel="$router.push('/')"
+      />
+      
+      <!-- 삭제 버튼 (폼과 별도로 배치) -->
+      <div class="mt-6">
         <div class="glass-dark rounded-2xl p-6 border border-white/10">
-          <label for="title" class="block text-sm font-semibold text-white mb-3">
-            제목 <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <input
-              id="title"
-              v-model="form.title"
-              type="text"
-              placeholder="게시글 제목을 입력하세요..."
-              class="w-full px-4 py-4 bg-slate-800/50 border border-slate-600/50 rounded-xl
-                     focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500
-                     transition-all duration-300 placeholder-slate-400 text-lg font-medium text-white"
-              :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500/20': errors.title }"
-            />
-            <div class="absolute right-4 top-4 text-sm text-slate-400">
-              {{ form.title.length }}/100
-            </div>
-          </div>
-          <p v-if="errors.title" class="text-red-500 text-sm mt-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-            </svg>
-            {{ errors.title }}
-          </p>
-        </div>
-
-        <!-- 내용 입력 -->
-        <div class="glass-dark rounded-2xl p-6 border border-white/10">
-          <label for="content" class="block text-sm font-semibold text-white mb-3">
-            내용 <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <textarea
-              id="content"
-              v-model="form.content"
-              rows="12"
-              placeholder="게시글 내용을 작성하세요..."
-              class="w-full px-4 py-4 bg-slate-800/50 border border-slate-600/50 rounded-xl
-                     focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500
-                     transition-all duration-300 placeholder-slate-400 leading-relaxed resize-none text-white"
-              :class="{ 'border-red-300 focus:border-red-500 focus:ring-red-500/20': errors.content }"
-            ></textarea>
-            <div class="absolute right-4 bottom-4 text-sm text-slate-400">
-              {{ form.content.length }}/2000
-            </div>
-          </div>
-          <p v-if="errors.content" class="text-red-500 text-sm mt-2 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-            </svg>
-            {{ errors.content }}
-          </p>
-        </div>
-
-        <!-- 버튼 영역 -->
-        <div class="glass-dark rounded-2xl p-6 border border-white/10">
-          <div class="flex flex-col sm:flex-row gap-4 sm:justify-end">
+          <div class="flex justify-center">
             <button
-              type="button"
-              @click="$router.push('/')"
-              class="btn-secondary order-2 sm:order-1"
-              :disabled="submitting"
-            >
-              취소
-            </button>
-            
-            <button
-              type="button"
               @click="deletePost"
-              class="bg-red-500 text-white px-6 py-3 rounded-xl font-semibold 
+              class="bg-red-500 text-white px-8 py-3 rounded-xl font-semibold 
                      transition-all duration-300 hover:bg-red-600 hover:shadow-lg 
                      hover:shadow-red-500/25 active:scale-95 flex items-center 
-                     justify-center gap-2 order-3 sm:order-2"
+                     justify-center gap-2"
               :disabled="submitting"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
               </svg>
-              삭제
-            </button>
-            
-            <button
-              type="submit"
-              class="btn-primary order-1 sm:order-3 flex items-center justify-center gap-2"
-              :disabled="submitting || !isFormValid"
-            >
-              <svg v-if="submitting" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              {{ submitting ? '수정 중...' : '수정 완료' }}
+              게시글 삭제
             </button>
           </div>
         </div>
-      </form>
+      </div>
     </div>
 
     <!-- 에러 상태 -->
@@ -183,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 // 라우트 정보
 const route = useRoute()
@@ -200,7 +135,9 @@ useHead({
 // 폼 데이터
 const form = ref({
   title: '',
-  content: ''
+  content: '',
+  // STEP 2-1: 엑셀 데이터 필드 추가
+  excelData: []
 })
 
 // 상태 관리
@@ -209,75 +146,18 @@ const submitting = ref(false)
 const showSuccess = ref(false)
 const redirecting = ref(false)
 
-// 에러 상태
-const errors = ref({
-  title: '',
-  content: ''
-})
-
-// 폼 유효성 검사
-const isFormValid = computed(() => {
-  return form.value.title.trim().length > 0 && 
-         form.value.content.trim().length > 0 &&
-         form.value.title.length <= 100 &&
-         form.value.content.length <= 2000
-})
-
-// 실시간 유효성 검사
-watch(() => form.value.title, (newTitle) => {
-  if (newTitle.trim().length === 0) {
-    errors.value.title = '제목을 입력해주세요.'
-  } else if (newTitle.length > 100) {
-    errors.value.title = '제목은 100자 이내로 입력해주세요.'
-  } else {
-    errors.value.title = ''
-  }
-})
-
-watch(() => form.value.content, (newContent) => {
-  if (newContent.trim().length === 0) {
-    errors.value.content = '내용을 입력해주세요.'
-  } else if (newContent.length > 2000) {
-    errors.value.content = '내용은 2000자 이내로 입력해주세요.'
-  } else {
-    errors.value.content = ''
-  }
-})
-
-// 게시글 로드
-const loadPost = async () => {
-  try {
-    loadingPost.value = true
-    const response = await $fetch(`/api/board/${postId}`)
-    
-    if (response.success && response.data) {
-      form.value = {
-        title: response.data.TITLE || '',
-        content: response.data.CONTENT || ''
-      }
-    } else {
-      throw new Error('게시글을 찾을 수 없습니다.')
-    }
-  } catch (error) {
-    console.error('게시글 로드 실패:', error)
-    // 에러 상태는 v-else에서 처리됨
-  } finally {
-    loadingPost.value = false
-  }
-}
-
-// 게시글 수정
-const updatePost = async () => {
-  if (!isFormValid.value) return
-  
+// BoardForm 컴포넌트에서 제출된 데이터 처리
+const handleFormSubmit = async (formData) => {
   submitting.value = true
   
   try {
+    // STEP 2-2: 엑셀 데이터를 포함하여 API 호출
     const response = await $fetch(`/api/board/${postId}`, {
       method: 'PUT',
       body: {
-        title: form.value.title.trim(),
-        content: form.value.content.trim()
+        title: formData.title,
+        content: formData.content,
+        excelData: formData.excelData
       }
     })
     
@@ -299,6 +179,34 @@ const updatePost = async () => {
     submitting.value = false
   }
 }
+
+
+
+// 게시글 로드
+const loadPost = async () => {
+  try {
+    loadingPost.value = true
+    const response = await $fetch(`/api/board/${postId}`)
+    
+    if (response.success && response.data) {
+      form.value = {
+        title: response.data.TITLE || '',
+        content: response.data.CONTENT || '',
+        // STEP 2-3: 엑셀 데이터도 로드
+        excelData: response.data.EXCEL_DATA || []
+      }
+    } else {
+      throw new Error('게시글을 찾을 수 없습니다.')
+    }
+  } catch (error) {
+    console.error('게시글 로드 실패:', error)
+    // 에러 상태는 v-else에서 처리됨
+  } finally {
+    loadingPost.value = false
+  }
+}
+
+
 
 // 게시글 삭제
 const deletePost = async () => {

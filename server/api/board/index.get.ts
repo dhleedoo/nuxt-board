@@ -1,11 +1,8 @@
 // 게시판 목록 조회 API - GET /api/board (페이지네이션 지원)
-import { executeQuery, ensureBoardTable } from '~/server/utils/database'
+import { executeQuery } from '~/server/utils/database'
 
 export default defineEventHandler(async (event) => {
   try {
-    // 게시판 테이블 존재 확인
-    await ensureBoardTable()
-    
     // 쿼리 파라미터 파싱
     const query = getQuery(event)
     const page = Number(query.page) || 1
@@ -25,13 +22,12 @@ export default defineEventHandler(async (event) => {
       bindParams.keyword = `%${keyword.trim()}%`
     }
     
-    // 페이지네이션 쿼리 (Oracle 방식)
+    // 페이지네이션 쿼리 (Oracle 방식) - CONTENT와 EXCEL_DATA 컬럼은 제외하여 성능 향상
     const listQuery = `
       SELECT * FROM (
         SELECT 
           BOARD_ID, 
           TITLE, 
-          CONTENT, 
           TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') as CREATED_AT,
           TO_CHAR(UPDATED_AT, 'YYYY-MM-DD HH24:MI:SS') as UPDATED_AT,
           ROW_NUMBER() OVER (ORDER BY BOARD_ID DESC) AS RN
@@ -62,7 +58,6 @@ export default defineEventHandler(async (event) => {
     const boardData = (result.rows || []).map((row: any) => ({
       BOARD_ID: Number(row.BOARD_ID) || 0,
       TITLE: String(row.TITLE || '제목 없음'),
-      CONTENT: String(row.CONTENT || '내용 없음'),
       CREATED_AT: String(row.CREATED_AT || ''),
       UPDATED_AT: String(row.UPDATED_AT || '')
     }))
