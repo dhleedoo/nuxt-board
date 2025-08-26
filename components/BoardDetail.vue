@@ -19,28 +19,6 @@
           </div>
         </div>
         
-        <!-- 수정/삭제 버튼 (작성자인 경우만 표시) -->
-        <div v-if="isAuthor" class="flex gap-3">
-          <button 
-            @click="$emit('edit')"
-            class="btn-secondary flex items-center gap-2"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-            수정
-          </button>
-          
-          <button 
-            @click="$emit('delete')"
-            class="btn-danger flex items-center gap-2"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-            </svg>
-            삭제
-          </button>
-        </div>
       </div>
       
       <!-- 게시글 내용 -->
@@ -48,7 +26,6 @@
         <div class="text-slate-200 leading-relaxed whitespace-pre-wrap">{{ boardData.content }}</div>
       </div>
     </div>
-
     <!-- 엑셀 데이터 섹션 -->
     <div v-if="boardData.excelData && boardData.excelData.length > 0" class="safe-container">
       <div class="mb-6">
@@ -59,10 +36,33 @@
       <!-- ExcelEditor 컴포넌트를 읽기 전용으로 사용 -->
       <ExcelEditor
         :editable="false"
-        :headers="excelHeaders"
         :initial-data="boardData.excelData"
       />
     </div>
+    <br>
+    <!-- 수정/삭제 버튼 (작성자인 경우만 표시) -->
+    <div v-if="isAuthor" class="flex gap-3">
+      <button 
+        @click="$emit('edit')"
+        class="btn-secondary flex items-center gap-2"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        수정
+      </button>
+      
+      <button 
+        @click="$emit('delete')"
+         class="btn-secondary flex items-center gap-2"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        삭제
+      </button>
+    </div>
+
   </div>
 </template>
 
@@ -85,12 +85,9 @@ const props = defineProps({
   },
   isAuthor: {
     type: Boolean,
-    default: false
+    default: true
   },
-  excelHeaders: {
-    type: Array,
-    default: () => ['제품명', '수량', '단가', '총액']
-  }
+
 })
 
 // Emits 정의

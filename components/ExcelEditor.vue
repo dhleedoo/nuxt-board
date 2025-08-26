@@ -252,7 +252,7 @@
                 // SpreadJS 기본 편집 옵션 설정
                 this.sheet.options.allowUserEdit = true;    // 사용자 편집 허용
                 this.sheet.options.allowUserResize = true;  // 사용자 크기 조정 허용
-                
+                this.sheet.options.allowUserFormat = true;  // 🆕 사용자 서식 편집 허용 (추가!)
                 // ========================================
                 // 7. 셀 편집 이벤트 바인딩
                 // ========================================

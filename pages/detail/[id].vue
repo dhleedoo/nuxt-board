@@ -44,7 +44,6 @@
       <BoardDetail 
         :board-data="boardData"
         :is-author="isAuthor"
-        :excel-headers="['제품명', '수량', '단가', '총액']"
         @edit="handleEdit"
         @delete="handleDelete"
       />
@@ -87,7 +86,7 @@ useHead({
 // 상태 관리
 const loading = ref(true)
 const boardData = ref(null)
-const isAuthor = ref(false) // TODO: 실제 사용자 인증 로직으로 대체
+const isAuthor = ref(true) // TODO: 실제 사용자 인증 로직으로 대체
 
 // 게시글 데이터 로드
 const loadBoardData = async () => {

@@ -357,10 +357,10 @@
         // ========================================
         // 방법 3: fallback - 기존 데이터 사용
         // ========================================
-        if (currentExcelData.length === 0) {
-          console.log('🔄 fallback: 기존 form.excelData 사용');
-          currentExcelData = form.value.excelData
-        }
+        // if (currentExcelData.length === 0) {
+        //   console.log('🔄 fallback: 기존 form.excelData 사용');
+        //   currentExcelData = form.value.excelData
+        // }
       }
     } catch (error) {
       console.error('❌ Excel 데이터 가져오기 실패:', error);
