@@ -27,18 +27,7 @@
       </div>
     </div>
     <!-- 엑셀 데이터 섹션 -->
-    <div v-if="boardData.excelData && boardData.excelData.length > 0" class="safe-container">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-white mb-2">엑셀 데이터</h2>
-        <p class="text-slate-300">게시글과 함께 등록된 엑셀 데이터입니다.</p>
-      </div>
-      
-      <!-- ExcelEditor 컴포넌트를 읽기 전용으로 사용 -->
-      <ExcelEditor
-        :editable="false"
-        :initial-data="boardData.excelData"
-      />
-    </div>
+    <ExcelViewer :excelData="boardData.excelData" />
     <br>
     <!-- 수정/삭제 버튼 (작성자인 경우만 표시) -->
     <div v-if="isAuthor" class="flex gap-3">
@@ -67,7 +56,7 @@
 </template>
 
 <script setup>
-import ExcelEditor from './ExcelEditor.vue'
+import ExcelViewer from './ExcelViewer.vue'
 
 // Props 정의
 const props = defineProps({

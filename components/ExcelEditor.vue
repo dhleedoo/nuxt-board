@@ -43,14 +43,6 @@
       // Props 정의 - 외부에서 전달받는 설정값
       // ========================================
       props: {
-          // 편집 모드 설정
-          // - true: 일반 편집 모드 (기본값)
-          // - false: 읽기 전용 모드 (시트 보호 활성화)
-          editable: {
-              type: Boolean,
-              default: true
-          },
-          
           // 초기 데이터 설정
           // - BoardCreate: 빈 배열 [] (새로 작성)
           // - BoardEdit: 기존 데이터 배열 (수정)
@@ -239,16 +231,8 @@
                 }
                 
                 // ========================================
-                // 6. 편집 모드 및 기본 옵션 설정
+                // 6. 기본 편집 옵션 설정
                 // ========================================
-                // 편집 가능 여부에 따른 시트 보호 설정
-                if (!this.editable) {
-                    this.sheet.options.isProtected = true;
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log('✅ 읽기 전용 모드 설정 완료');
-                    }
-                }
-                
                 // SpreadJS 기본 편집 옵션 설정
                 this.sheet.options.allowUserEdit = true;    // 사용자 편집 허용
                 this.sheet.options.allowUserResize = true;  // 사용자 크기 조정 허용
