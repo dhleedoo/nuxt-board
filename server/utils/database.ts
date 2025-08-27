@@ -57,14 +57,14 @@ let pool: Pool | null = null
 export async function initializePool(): Promise<Pool> {
   if (!pool) {
     try {
-      console.log('🔗 Oracle DB 연결 풀 생성 중...')
+      // Oracle DB 연결 풀 생성 중
       pool = await oracledb.createPool(poolConfig)
-      console.log('✅ Oracle DB 연결 풀 생성 완료!')
+              // Oracle DB 연결 풀 생성 완료
       
       // 연결 테스트: 실제 DB 연결이 정상인지 확인
       const connection = await pool.getConnection()
       const result = await connection.execute('SELECT SYSDATE FROM DUAL')
-      console.log(`📅 DB 연결 테스트 성공: ${result.rows?.[0]}`)
+              // DB 연결 테스트 성공
       await connection.close()
       
     } catch (error) {
@@ -107,7 +107,7 @@ export async function closePool(): Promise<void> {
     try {
       await pool.close(10) // 10초 대기 후 강제 종료
       pool = null
-      console.log('🔚 Oracle DB 연결 풀 종료 완료')
+      // Oracle DB 연결 풀 종료 완료
     } catch (error) {
       console.error('❌ 연결 풀 종료 실패:', error)
     }
@@ -149,9 +149,9 @@ export async function executeQuery(
       ...options
     }
     
-    console.log('🔍 SQL 실행:', query.substring(0, 100) + '...')
+    // SQL 실행
     const result = await connection.execute(query, binds, defaultOptions)
-    console.log(`✅ 쿼리 성공: ${result.rowsAffected || result.rows?.length || 0}개 행 처리`)
+          // 쿼리 성공
     
     return result
   } catch (error) {
@@ -186,7 +186,7 @@ export async function saveExcelDataToBoard(boardId: number, excelData: any): Pro
     })
     
     if (result.rowsAffected && result.rowsAffected > 0) {
-      console.log(`✅ Excel 데이터 저장 성공: BOARD_ID ${boardId}`)
+      // Excel 데이터 저장 성공
       return true
     } else {
       throw new Error('Excel 데이터 저장에 실패했습니다.')

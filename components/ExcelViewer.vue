@@ -6,7 +6,7 @@
     </div>
     
     <div v-if="excelData && excelData.length > 0" class="viewer-content">
-      <div class="excel-grid">
+      <div class="excel-grid" :style="{ gridTemplateColumns: `repeat(${maxColumns}, minmax(120px, 1fr))` }">
         <div v-for="(row, rowIndex) in excelData" :key="rowIndex" class="grid-row">
           <div v-for="(cell, cellIndex) in row" :key="cellIndex" class="grid-cell">
             {{ cell || '' }}
@@ -27,11 +27,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   excelData: {
     type: Array,
     default: () => []
   }
+})
+
+// 실제 데이터의 최대 열 수를 계산
+const maxColumns = computed(() => {
+  if (!props.excelData || props.excelData.length === 0) return 0
+  
+  // 모든 행에서 최대 열 수 찾기
+  return Math.max(...props.excelData.map(row => row.length))
 })
 </script>
 
@@ -64,7 +74,6 @@ const props = defineProps({
 
 .excel-grid {
   display: grid;
-  grid-template-columns: repeat(20, minmax(120px, 1fr)); /* 20열, 최소 120px, 최대 자동 */
   gap: 1px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 0.5rem;

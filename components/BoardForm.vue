@@ -84,6 +84,7 @@
         ref="excelEditor"
         :editable="true"
         :initial-data="form.excelData"
+        @data-change="handleDataChange"
       />
     </div>
 
@@ -127,7 +128,7 @@
   // ========================================
   // Vue 3 Composition API imports
   // ========================================
-  import { ref, computed, watch, getCurrentInstance } from 'vue'
+  import { ref, computed, watch, getCurrentInstance, nextTick } from 'vue'
   import ExcelEditor from './ExcelEditor.vue'
 
   // ========================================
@@ -189,18 +190,35 @@
   // ========================================
   // 이벤트 정의
   // ========================================
+  
   const emit = defineEmits(['submit', 'cancel'])
-
   // ========================================
   // 반응형 데이터
   // ========================================
+  
+  // ExcelEditor ref
+  const excelEditor = ref(null)
+  
   // 폼 데이터
   const form = ref({
     title: props.initialData?.title || '',
     content: props.initialData?.content || '',
     excelData: props.initialData?.excelData || []
   })
-
+  
+  // ========================================
+  // data-change 이벤트 핸들러
+  // ========================================
+  const handleDataChange = (data) => {
+    console.log('🔍 data-change 이벤트 수신:', data);
+    console.log('🔍 데이터 타입:', typeof data);
+    console.log('🔍 데이터 길이:', data ? data.length : 'undefined');
+    console.log('🔍 데이터 내용:', JSON.stringify(data));
+    
+    form.value.excelData = data || [];
+    console.log('✅ form.excelData 업데이트 후:', form.value.excelData);
+  };
+  
   // 에러 상태
   const errors = ref({
     title: '',
@@ -217,10 +235,8 @@
   const contentId = `content-${Math.random().toString(36).substr(2, 9)}`
 
   // ========================================
-  // 디버깅: 초기 데이터 확인
+  // 초기 데이터 설정 완료
   // ========================================
-  console.log('🔍 BoardForm 초기 데이터:', props.initialData);
-  console.log('🔍 form.excelData 초기값:', form.value.excelData);
 
   // ========================================
   // 계산된 속성
@@ -266,128 +282,42 @@
    * - ExcelEditor에서 현재 데이터를 가져와서 부모 컴포넌트에 전달
    * - 여러 방법으로 ExcelEditor 컴포넌트 인스턴스에 접근 시도
    */
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     if (!isFormValid.value) return
-    
-    console.log('🚀 BoardForm handleSubmit 시작');
     submitting.value = true
     
-    // ExcelEditor에서 현재 데이터를 가져옴 (저장 시에만)
     let currentExcelData = []
     
     try {
-      // ========================================
-      // 방법 1: ref를 통한 직접 접근
-      // ========================================
-      const excelEditor = getCurrentInstance()?.refs.excelEditor
-      console.log('🔍 ExcelEditor ref (방법1):', excelEditor);
-      
-      if (excelEditor && typeof excelEditor.saveData === 'function') {
-        console.log('✅ ExcelEditor.saveData 메서드 존재 확인');
-        // saveData가 Promise를 반환하므로 await 사용
-        currentExcelData = await excelEditor.saveData() || []
-        console.log('💾 ExcelEditor.saveData 결과:', currentExcelData);
-        console.log('📊 결과 데이터 타입:', typeof currentExcelData);
-        console.log('📊 결과 데이터 길이:', currentExcelData.length);
+      // ExcelEditor ref를 통한 안정적인 접근
+      if (excelEditor.value && typeof excelEditor.value.saveData === 'function') {
+        console.log('✅ ExcelEditor에서 데이터 가져오기 시작')
+        currentExcelData = await excelEditor.value.saveData() || []
+        console.log('✅ ExcelEditor 데이터:', currentExcelData)
       } else {
-        console.warn('⚠️ ExcelEditor ref 또는 saveData 메서드가 없습니다');
-        
-        // ========================================
-        // 방법 2: DOM을 통한 간접 접근 (Vue 3 방식)
-        // ========================================
-        const excelEditorElement = document.querySelector('[data-excel-editor]')
-        console.log('🔍 ExcelEditor DOM 요소 (방법2):', excelEditorElement);
-        
-        if (excelEditorElement) {
-          // Vue 3에서 컴포넌트 인스턴스에 접근하는 여러 방법 시도
-          let component = null;
-          
-          // 방법 2-1: __vueParentComponent
-          if (excelEditorElement.__vueParentComponent) {
-            const vueComponent = excelEditorElement.__vueParentComponent;
-            console.log('🔍 Vue 컴포넌트 전체:', vueComponent);
-            
-            // 여러 방법으로 saveData 메서드 찾기
-            if (vueComponent.exposed && typeof vueComponent.exposed.saveData === 'function') {
-              component = vueComponent.exposed;
-              console.log('✅ 방법 2-1a (exposed):', component);
-            } else if (vueComponent.ctx && typeof vueComponent.ctx.saveData === 'function') {
-              component = vueComponent.ctx;
-              console.log('✅ 방법 2-1b (ctx):', component);
-            } else if (vueComponent.proxy && typeof vueComponent.proxy.saveData === 'function') {
-              component = vueComponent.proxy;
-              console.log('✅ 방법 2-1c (proxy):', component);
-            } else {
-              console.log('🔍 Vue 컴포넌트 구조:', {
-                exposed: vueComponent.exposed,
-                ctx: vueComponent.ctx,
-                proxy: vueComponent.proxy,
-                hasExposed: !!vueComponent.exposed,
-                hasCtx: !!vueComponent.ctx,
-                hasProxy: !!vueComponent.proxy
-              });
-            }
-          }
-          
-          // 방법 2-2: __vue_app__
-          if (!component && excelEditorElement.__vue_app__) {
-            component = excelEditorElement.__vue_app__;
-            console.log('🔍 방법 2-2 (__vue_app__):', component);
-          }
-          
-          // 방법 2-3: 모든 Vue 관련 속성 확인
-          if (!component) {
-            const vueProps = Object.getOwnPropertyNames(excelEditorElement).filter(prop => prop.startsWith('__vue'));
-            console.log('🔍 Vue 관련 속성들:', vueProps);
-            
-            for (const prop of vueProps) {
-              console.log(`🔍 ${prop}:`, excelEditorElement[prop]);
-            }
-          }
-          
-          if (component && typeof component.saveData === 'function') {
-            console.log('✅ ExcelEditor.saveData 메서드 발견 (방법2)');
-            currentExcelData = await component.saveData() || []
-            console.log('💾 ExcelEditor.saveData 결과 (방법2):', currentExcelData);
-          } else {
-            console.warn('⚠️ ExcelEditor 컴포넌트 또는 saveData 메서드를 찾을 수 없습니다');
-          }
-        }
-        
-        // ========================================
-        // 방법 3: fallback - 기존 데이터 사용
-        // ========================================
-        // if (currentExcelData.length === 0) {
-        //   console.log('🔄 fallback: 기존 form.excelData 사용');
-        //   currentExcelData = form.value.excelData
-        // }
+        console.log('⚠️ ExcelEditor 접근 실패, form.excelData 사용')
+        currentExcelData = form.value.excelData || []
       }
     } catch (error) {
-      console.error('❌ Excel 데이터 가져오기 실패:', error);
-      currentExcelData = form.value.excelData // fallback
+      console.error('❌ Excel 데이터 가져오기 실패:', error)
+      currentExcelData = form.value.excelData || []
     }
     
-    // ========================================
-    // 제출할 데이터 구성 및 전송
-    // ========================================
-    // 디버깅: 제출할 데이터 확인
+    // 제출할 데이터 구성
     const submitData = {
       title: form.value.title.trim(),
       content: form.value.content.trim(),
       excelData: currentExcelData
     }
     
-    console.log('📤 BoardForm 제출 데이터:', submitData)
-    console.log('📊 제출할 엑셀 데이터:', submitData.excelData)
-    console.log('📊 엑셀 데이터 타입:', typeof submitData.excelData)
+    console.log('📤 최종 제출 데이터:', submitData)
     console.log('📊 엑셀 데이터 길이:', submitData.excelData.length)
     
     try {
-      // 부모 컴포넌트에 데이터 전달
       emit('submit', submitData)
-      console.log('✅ submit 이벤트 발생 완료');
+      console.log('✅ submit 이벤트 발생 완료')
     } catch (error) {
-      console.error('폼 제출 실패:', error)
+      console.error('❌ submit 이벤트 발생 실패:', error)
     } finally {
       submitting.value = false
     }

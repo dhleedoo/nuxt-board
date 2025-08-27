@@ -45,9 +45,9 @@ export default defineEventHandler(async (event) => {
     const result = await executeQuery(deleteQuery, { postId })
     
     if (result.rowsAffected && result.rowsAffected > 0) {
-      console.log(`✅ 게시글 삭제 성공: BOARD_ID ${postId}`)
+      // 게시글 삭제 성공
     } else {
-      console.log(`⚠️ 삭제할 게시글이 없습니다: BOARD_ID ${postId}`)
+              // 삭제할 게시글이 없음
     }
 
     return {

@@ -80,9 +80,7 @@
         // - SpreadJS가 DOM에 완전히 마운트된 후 실행
         // - 초기화 대기 상태를 로그로 확인 (개발 모드에서만)
         this.$nextTick(() => {
-          if (!this.isInitialized && process.env.NODE_ENV === 'development') {
-            console.log('🔄 ExcelEditor 마운트 완료, 초기화 대기 중...');
-          }
+          // 초기화 대기 상태 확인
         });
       },
       
@@ -98,9 +96,7 @@
           
           this.sheet = null;
           this.isInitialized = false;
-          if (process.env.NODE_ENV === 'development') {
-            console.log('✅ ExcelEditor 정리 작업 완료');
-          }
+          // 정리 작업 완료
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
             console.warn('⚠️ ExcelEditor 정리 작업 중 오류:', error);
@@ -136,9 +132,7 @@
          */
         initWorkbook(spread) {
             try {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('🔄 ExcelEditor 초기화 시작...');
-                }
+                            // ExcelEditor 초기화 시작
                 
                 // ========================================
                 // 1. 한국어 로케일 설정
@@ -214,20 +208,16 @@
                         return newRow;
                     });
                     
-                    // ========================================
-                    // 5c. 배치 데이터 입력
-                    // ========================================
-                    // setArray: 2차원 배열을 한 번에 입력 (setValue 반복 대신)
-                    // - 1번 행부터 시작 (0번 행은 헤더용으로 예약)
-                    // - 0번 열부터 시작 (A열부터)
-                    this.sheet.setArray(1, 0, dataArray);
+                                         // ========================================
+                     // 5c. 데이터 입력
+                     // ========================================
+                     // 0번 행부터 데이터 입력 (헤더 강제 설정 없음)
+                     this.sheet.setArray(0, 0, dataArray);
                     
                     // 렌더링 재개
                     this.spread.resumePaint();
                     
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log('✅ 초기 데이터 설정 완료 (BoardCreate와 동일한 방식)');
-                    }
+                                    // 초기 데이터 설정 완료
                 }
                 
                 // ========================================
@@ -245,16 +235,24 @@
                 // - 마우스 클릭으로 셀 이동 시에도 편집 완료 처리
                 // - 개발 모드에서만 로그 출력 (프로덕션 성능 최적화)
                 this.sheet.bind(GC.Spread.Sheets.Events.EditEnded, (e, args) => {
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log('📝 셀 편집 완료:', args);
-                    }
+                    // 셀 편집 완료 처리
+                    // 셀 편집 완료 시 데이터 추출 및 부모에게 전달
+                    console.log('🔍 EditEnded 이벤트 발생!');
+                    const currentData = this.getSheetData();
+                    console.log('�� 추출된 데이터:', currentData);
+                    this.$emit('data-change', currentData);
                 });
                 
                 // 초기화 완료 상태 설정
                 this.isInitialized = true;
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('✅ ExcelEditor 초기화 완료');
+                
+                // 초기 데이터가 있는 경우 data-change 이벤트 발생
+                if (this.initialData && this.initialData.length > 0) {
+                    const initialData = this.getSheetData();
+                    this.$emit('data-change', initialData);
                 }
+                
+                // ExcelEditor 초기화 완료
                 
             } catch (error) {
                 console.error('❌ ExcelEditor 초기화 실패:', error);
@@ -291,76 +289,61 @@
          * @returns {Array} 2차원 배열 형태의 시트 데이터 [[행1], [행2], ...]
          */
         getSheetData() {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('🔍 getSheetData 시작');
-            }
-            
             if (!this.sheet) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.warn('⚠️ 시트가 초기화되지 않았습니다.');
-                }
                 return [];
             }
             
             try {
-                const rowCount = this.sheet.getRowCount();
-                const colCount = this.sheet.getColumnCount();
+                const data = [];
+                let maxCol = 0; // 실제 데이터가 있는 최대 열 인덱스
+                let maxRow = 0; // 실제 데이터가 있는 최대 행 인덱스
                 
-                if (process.env.NODE_ENV === 'development') {
-                    console.log(`📊 시트 크기: ${rowCount}행 x ${colCount}열`);
+                // 먼저 모든 행을 순회하면서 실제 데이터가 있는 최대 행/열 찾기
+                for (let row = 0; row < 1000; row++) {
+                    let rowHasData = false;
+                    for (let col = 0; col < 100; col++) {
+                        try {
+                            const cellValue = this.sheet.getValue(row, col);
+                            if (cellValue && cellValue.toString().trim() !== '') {
+                                maxCol = Math.max(maxCol, col);
+                                rowHasData = true;
+                            }
+                        } catch (error) {
+                            // 오류 무시
+                        }
+                    }
+                    if (rowHasData) {
+                        maxRow = row;
+                    }
                 }
                 
-                const data = [];
-                
-                // 모든 행을 순회하면서 데이터가 있는 행만 수집
-                for (let row = 0; row < rowCount; row++) {
-                    const rowData = [];
+                // 실제 데이터가 있는 행/열만큼만 처리
+                for (let row = 0; row <= maxRow; row++) {
                     let hasData = false;
+                    const rowData = [];
                     
-                    // 20열까지 데이터 가져오기 (열 구조 유지)
-                    for (let col = 0; col < 20; col++) {
+                    // 0부터 maxCol까지의 열만 확인
+                    for (let col = 0; col <= maxCol; col++) {
                         try {
-                            let cellValue = '';
-                            if (row < rowCount && col < colCount) {
-                                cellValue = this.sheet.getValue(row, col);
-                            }
-                            
-                            // 빈 값이 아닌 경우 데이터가 있다고 표시
+                            const cellValue = this.sheet.getValue(row, col);
                             if (cellValue && cellValue.toString().trim() !== '') {
                                 hasData = true;
                             }
-                            
-                            // 열 구조 유지: 빈 셀도 빈 문자열로 저장
                             rowData.push(cellValue || '');
-                        } catch (cellError) {
-                            if (process.env.NODE_ENV === 'development') {
-                                console.warn(`⚠️ 셀 (${row}, ${col}) 값 가져오기 실패:`, cellError);
-                            }
+                        } catch (error) {
                             rowData.push('');
                         }
                     }
                     
-                    // 데이터가 있는 행만 추가 (빈 행 제외)
+                    // 값이 하나라도 있으면 행 추가
                     if (hasData) {
                         data.push(rowData);
-                        if (process.env.NODE_ENV === 'development') {
-                            console.log(`📝 유효한 행 ${row} 데이터:`, rowData);
-                            console.log(`📊 열 구조: A=${rowData[0]}, B=${rowData[1]}, C=${rowData[2]}, D=${rowData[3]}`);
-                        }
                     }
                 }
                 
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('📋 최종 시트 데이터 (열 구조 유지):', data);
-                    console.log('📊 최종 데이터 길이:', data.length);
-                    console.log('📊 각 행 길이:', data.map(row => row.length));
-                }
                 return data;
                 
             } catch (error) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('❌ getSheetData 실행 실패:', error);
-                }
                 return [];
             }
         },
@@ -390,57 +373,84 @@
         async saveData() {
             return new Promise((resolve) => {
                 try {
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log('🚀 saveData 시작');
-                    }
+                    // saveData 시작
                     
                     if (!this.sheet) {
-                        if (process.env.NODE_ENV === 'development') {
-                            console.warn('⚠️ 시트가 초기화되지 않았습니다.');
-                        }
+                        // 시트가 초기화되지 않음
                         resolve([]);
                         return;
                     }
 
-                    if (process.env.NODE_ENV === 'development') {
-                        console.log('✅ 시트 존재 확인됨');
-                        console.log('📊 시트 상태:', {
-                            isInitialized: this.isInitialized,
-                            rowCount: this.sheet.getRowCount(),
-                            colCount: this.sheet.getColumnCount()
-                        });
-                    }
+                    // 시트 상태 확인
 
                     // 셀 편집 완료를 위한 지연 처리
                     setTimeout(() => {
                         try {
                             const data = this.getSheetData();
-                            if (process.env.NODE_ENV === 'development') {
-                                console.log('💾 getSheetData 결과:', data);
-                                console.log('📊 데이터 타입:', typeof data);
-                                console.log('📊 데이터 길이:', data.length);
-                                console.log('📊 데이터 내용:', JSON.stringify(data));
-                            }
+                            // 데이터 추출 완료
                             
                             resolve(data);
                         } catch (error) {
-                            if (process.env.NODE_ENV === 'development') {
-                                console.error('❌ getSheetData 실행 중 오류:', error);
-                            }
                             resolve([]);
                         }
                     }, 100);
                     
                 } catch (error) {
-                    if (process.env.NODE_ENV === 'development') {
-                        console.error('❌ saveData 실행 실패:', error);
-                    }
                     resolve([]);
                 }
             });
+        },
+
+        /**
+         * toJSON을 사용하여 전체 시트 데이터를 가져오는 새로운 메서드
+         * 
+         * [핵심 기능]
+         * - SpreadJS의 toJSON() 메서드를 사용하여 전체 시트 정보 추출
+         * - 셀 데이터, 스타일, 병합 정보 등 모든 정보 포함
+         * - 더 완전하고 안전한 데이터 추출 방식
+         * 
+         * @returns {Promise<Object>} 전체 시트 데이터 (JSON 형태)
+         */
+        async saveDataComplete() {
+            return new Promise((resolve) => {
+                try {
+                    if (!this.sheet) {
+                        resolve({ data: [], mergedCells: [] });
+                        return;
+                    }
+
+                    // 셀 편집 완료를 위한 지연 처리
+                    setTimeout(() => {
+                        try {
+                            // toJSON을 사용하여 전체 시트 데이터 추출
+                            const sheetData = this.sheet.toJSON();
+                            console.log('🔍 toJSON 결과:', sheetData);
+                            
+                            // 데이터와 병합 정보 추출
+                            const data = sheetData.data || [];
+                            const mergedCells = sheetData.mergedCells || [];
+                            
+                            const result = {
+                                data: data,
+                                mergedCells: mergedCells,
+                                fullData: sheetData // 전체 데이터도 포함
+                            };
+                            
+                            resolve(result);
+                        } catch (error) {
+                            console.error('toJSON 실행 중 오류:', error);
+                            resolve({ data: [], mergedCells: [] });
+                        }
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('saveDataComplete 실행 중 오류:', error);
+                    resolve({ data: [], mergedCells: [] });
+                }
+            });
         }
-      }    
-  }
+      }
+   }
 </script>
   
 <style scoped>

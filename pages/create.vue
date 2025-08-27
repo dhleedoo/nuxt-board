@@ -92,10 +92,7 @@ const handleFormSubmit = async (formData) => {
   submitting.value = true
   
   // 디버깅: 전달받은 데이터 확인
-  console.log('📝 BoardForm에서 전달받은 데이터:', formData)
-  console.log('📊 엑셀 데이터:', formData.excelData)
-  console.log('📊 엑셀 데이터 타입:', typeof formData.excelData)
-  console.log('📊 엑셀 데이터 길이:', formData.excelData?.length)
+      // BoardForm에서 전달받은 데이터 처리
   
   try {
     // STEP 3-1: 엑셀 데이터를 포함하여 API 호출
